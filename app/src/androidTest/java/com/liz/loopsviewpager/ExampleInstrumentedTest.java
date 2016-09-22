@@ -1,4 +1,4 @@
-package com.liz.auto_loops_viewpager;
+package com.liz.loopsviewpager;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

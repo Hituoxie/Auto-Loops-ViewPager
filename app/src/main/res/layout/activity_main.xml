@@ -4,14 +4,22 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.liz.auto_loops_viewpager.MainActivity">
+    tools:context="com.liz.loopsviewpager.com.liz.activity.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
+    <com.imbryk.viewPager.LoopViewPager
+        android:id="@+id/lvp_pager"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="#aabbcc"
+        android:layout_alignParentTop="true"
+        />
+
+    <com.liz.loopsviewpager.AutoLoopViewPager
+        android:id="@+id/alvp_pager"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="#ccbbcc"
+        android:layout_alignParentBottom="true"
+        />
+
 </RelativeLayout>
