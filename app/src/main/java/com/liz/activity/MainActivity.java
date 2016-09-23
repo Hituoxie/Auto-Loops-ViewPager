@@ -34,8 +34,13 @@ public class MainActivity extends AppCompatActivity {
             "https://cache.hinabian.com/images/release/2/c/2e6c24d41c64294f04bc8828f607afdc.jpg",
             "https://cache.hinabian.com/images/release/f/6/f3f423b25d79297dc1b48585ad6ad8f6.jpg"};
 
+    private String[] img3 = new String[]{"https://cache.hinabian.com/images/release/0/d/02a25e28edcd90154c457939e973c95d.jpg",
+            "https://cache.hinabian.com/images/release/1/2/1983130c55d9d36aed35e631037b4e52.jpg",
+            "https://cache.hinabian.com/images/release/2/5/2c4a346109468371ce8ebaaf7a157535.jpg"};
+
     private List<String> data1 = new ArrayList<>();
     private List<String> data2 = new ArrayList<>();
+    private List<String> data3 = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
         alvpPager.setLoop(false);
 
-        alvpPager.setAdapter(new LoopPagerAdapter<String>(this,R.layout.viewpager_image,data2){
+        alvpPager.setAdapter(new LoopPagerAdapter<String>(this,R.layout.viewpager_image,data3){
 
             @Override
             public void bindView(View view, String data, final int position) {
@@ -68,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        alvpPager.startAutoLoop();
 
 
 
@@ -87,6 +94,10 @@ public class MainActivity extends AppCompatActivity {
         for(String url:img2){
             data2.add(url);
         }
+        for(String url:img3){
+            data3.add(url);
+        }
+
 
         ImageLoadProxy.initImageLoader(this);
     }

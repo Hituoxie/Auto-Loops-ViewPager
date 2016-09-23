@@ -2,10 +2,11 @@ package com.liz.loopsviewpager;
 
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -17,7 +18,9 @@ public abstract class LoopPagerAdapter<T> extends PagerAdapter{
     /**
      * 缓存View
      */
-    private List<View> mViews = new ArrayList<View>();
+    private LinkedList<Object> mViews = new LinkedList<>();
+
+    private SparseArray<Object> mViewItems = new SparseArray<>();
 
     private Context mContext;
     private List<T> mData;
@@ -93,7 +96,7 @@ public abstract class LoopPagerAdapter<T> extends PagerAdapter{
     public Object instantiateItem(ViewGroup container, int position) {
         int realPosition =  isLoop ? getRealPosition(position) : position;
 
-        View view = getViewFromCache();
+        View view = getViewFromCache(container,position);
 
         bindView(view,mData.get(realPosition),realPosition);
 
@@ -105,16 +108,22 @@ public abstract class LoopPagerAdapter<T> extends PagerAdapter{
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
         container.removeView((View) object);
-
-        mViews.add((View) object);
+        //mViews.addLast(object);
+        //mViewItems.put(position,object);
     }
 
-    private View getViewFromCache(){
-        View view;
-        if(mViews.size() == 0){
+    private View getViewFromCache(ViewGroup container,int position){
+        View view = null;
+
+        /*if(mViews.size() > 1){
+            view = (View) mViews.removeFirst();
+        }*/
+
+        view = (View)mViewItems.get(position);
+
+        if(view == null){
             view = View.inflate(mContext,mLayoutId,null);
-        }else{
-            view = mViews.remove(0);
+            mViewItems.put(position,view);
         }
 
         return view;

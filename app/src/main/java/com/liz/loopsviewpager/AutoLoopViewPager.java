@@ -2,16 +2,21 @@ package com.liz.loopsviewpager;
 
 import android.content.Context;
 import android.os.Handler;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.animation.Interpolator;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
 
 /**
  * @author li.zhen
- * @類說明  可以自动无限轮播的viewpager
+ * @類說明 可以自动无限轮播的viewpager<br/>
+ * 默认无限循环
  **/
 public class AutoLoopViewPager extends ViewPager {
     private static final String TAG = "AutoLoopsViewPager";
@@ -33,11 +38,18 @@ public class AutoLoopViewPager extends ViewPager {
      */
     private long interval = 3000;
 
+    /**
+     * 是否正在触摸
+     */
+    private boolean isTouching = false;
+
     private OnPageChangeListener mOuterPageChangeListener;
 
     private LoopPagerAdapter mAdapter;
 
-    private Handler myHandler;
+    private Handler mHandler;
+
+    private CustomDurationScroller scroller = null;
 
     public AutoLoopViewPager(Context context) {
         super(context);
@@ -52,6 +64,65 @@ public class AutoLoopViewPager extends ViewPager {
 
     private void init() {
         super.addOnPageChangeListener(onPageChangeListener);
+
+        try {
+            Field scrollerField = ViewPager.class.getDeclaredField("mScroller");
+            scrollerField.setAccessible(true);
+            Field interpolatorField = ViewPager.class.getDeclaredField("sInterpolator");
+            interpolatorField.setAccessible(true);
+
+            scroller = new CustomDurationScroller(getContext(), (Interpolator)interpolatorField.get(null));
+            scrollerField.set(this, scroller);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private long downTime = 0;
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent arg0) {
+        //长按时拦截点击事件
+        switch (MotionEventCompat.getActionMasked(arg0)) {
+            case MotionEvent.ACTION_DOWN:
+                downTime = System.currentTimeMillis();
+                break;
+
+            case MotionEvent.ACTION_UP:
+                if ((System.currentTimeMillis() - downTime) > 600) {
+                    return true;
+                }
+                break;
+        }
+        return super.onInterceptTouchEvent(arg0);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        //触摸时停止自动滚动
+        switch (MotionEventCompat.getActionMasked(ev)) {
+            case MotionEvent.ACTION_DOWN:
+                if (isAutoScroll) {
+                    getParent().requestDisallowInterceptTouchEvent(true);
+                    stopScrollToNext();
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                if (isAutoScroll) {
+                    getParent().requestDisallowInterceptTouchEvent(false);
+                    sendMessageScrollToNext();
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                if (isAutoScroll) {
+                    getParent().requestDisallowInterceptTouchEvent(false);
+                    sendMessageScrollToNext();
+                }
+                break;
+            default:
+                break;
+        }
+        return super.dispatchTouchEvent(ev);
     }
 
     @Override
@@ -67,10 +138,12 @@ public class AutoLoopViewPager extends ViewPager {
     }
 
 
-    /**设置是否无限循环
+    /**
+     * 设置是否无限循环
+     *
      * @param isLoop
      */
-    public void setLoop(boolean isLoop){
+    public void setLoop(boolean isLoop) {
         this.isLoop = isLoop;
     }
 
@@ -100,17 +173,26 @@ public class AutoLoopViewPager extends ViewPager {
         setCurrentItem(getCurrentItem() + 1, true);
     }
 
+    private void stopScrollToNext() {
+        if (mHandler != null) {
+            mHandler.removeMessages(WHAT_SHOW_NEXT);
+        }
+
+    }
+
     private void sendMessageScrollToNext() {
-        myHandler.removeMessages(WHAT_SHOW_NEXT);
-        myHandler.sendEmptyMessageDelayed(WHAT_SHOW_NEXT, interval);
+        if (mHandler != null) {
+            mHandler.removeMessages(WHAT_SHOW_NEXT);
+            mHandler.sendEmptyMessageDelayed(WHAT_SHOW_NEXT, interval);
+        }
     }
 
     /**
      * 开始滚动,自动支持无限循环
      *
-     * @param interval 滚动间隔时间
+     * @param interval 滚动间隔时间,默认3000ms
      */
-    public void startLooping(long interval) {
+    public void startAutoLoop(long interval) {
         this.interval = interval;
 
         isLoop = true;
@@ -120,14 +202,20 @@ public class AutoLoopViewPager extends ViewPager {
 
         setCurrentItem(0, false);
 
+        mAdapter.notifyDataSetChanged();
+
+        //setPageTransformer(true, new ZoomOutPageTransformer());
+
+        mHandler = new ScrollHandler(this);
+
         sendMessageScrollToNext();
     }
 
     /**
-     * 开始无限循环
+     * 开始无限循环，间隔时间,默认3000ms
      */
-    public void startLooping() {
-        startLooping(interval);
+    public void startAutoLoop() {
+        startAutoLoop(interval);
     }
 
     @Override
@@ -141,6 +229,7 @@ public class AutoLoopViewPager extends ViewPager {
 
         //super.addOnPageChangeListener(mOuterPageChangeListener);
     }
+
 
     private OnPageChangeListener onPageChangeListener = new OnPageChangeListener() {
         private float mPreviousOffset = -1;
@@ -165,7 +254,7 @@ public class AutoLoopViewPager extends ViewPager {
 
             int realPosition = position;
 
-            if(isLoop){
+            if (isLoop) {
                 if (mAdapter != null) {
                     realPosition = mAdapter.getRealPosition(position);
 
@@ -199,7 +288,7 @@ public class AutoLoopViewPager extends ViewPager {
                 int position = AutoLoopViewPager.super.getCurrentItem();
                 int realPosition = mAdapter.getRealPosition(position);
 
-                if(isLoop){
+                if (isLoop) {
                     if (state == ViewPager.SCROLL_STATE_IDLE
                             && (position == 0 || position == mAdapter.getCount() - 1)) {
                         setCurrentItem(realPosition, false);
@@ -214,7 +303,7 @@ public class AutoLoopViewPager extends ViewPager {
     };
 
 
-    private static class ScrollHandler extends Handler {
+    private class ScrollHandler extends Handler {
         private WeakReference<AutoLoopViewPager> pagerHolder;
 
         public ScrollHandler(AutoLoopViewPager pager) {
@@ -226,7 +315,9 @@ public class AutoLoopViewPager extends ViewPager {
             if (WHAT_SHOW_NEXT == msg.what) {
                 AutoLoopViewPager pager = pagerHolder.get();
                 if (pager != null) {
+                    scroller.setScrollDurationFactor(4.5f);
                     pager.scrollToNext();
+                    scroller.setScrollDurationFactor(1f);
                     pager.sendMessageScrollToNext();
                 }
             }
