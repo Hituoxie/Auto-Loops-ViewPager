@@ -102,20 +102,22 @@ public class AutoLoopViewPager extends ViewPager {
         //触摸时停止自动滚动
         switch (MotionEventCompat.getActionMasked(ev)) {
             case MotionEvent.ACTION_DOWN:
+                //解决父listview拦截问题
+                getParent().requestDisallowInterceptTouchEvent(true);
                 if (isAutoScroll) {
-                    getParent().requestDisallowInterceptTouchEvent(true);
                     stopScrollToNext();
                 }
                 break;
+
             case MotionEvent.ACTION_UP:
+                getParent().requestDisallowInterceptTouchEvent(false);
                 if (isAutoScroll) {
-                    getParent().requestDisallowInterceptTouchEvent(false);
                     sendMessageScrollToNext();
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
+                getParent().requestDisallowInterceptTouchEvent(false);
                 if (isAutoScroll) {
-                    getParent().requestDisallowInterceptTouchEvent(false);
                     sendMessageScrollToNext();
                 }
                 break;
