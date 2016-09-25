@@ -38,11 +38,6 @@ public class AutoLoopViewPager extends ViewPager {
      */
     private long interval = 3000;
 
-    /**
-     * 是否正在触摸
-     */
-    private boolean isTouching = false;
-
     private OnPageChangeListener mOuterPageChangeListener;
 
     private LoopPagerAdapter mAdapter;

@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.liz.loopsviewpager.com.liz.activity.MainActivity">
+    >
 
     <com.imbryk.viewPager.LoopViewPager
         android:id="@+id/lvp_pager"
@@ -21,5 +20,11 @@
         android:background="#ccbbcc"
         android:layout_alignParentBottom="true"
         />
+    <com.liz.loopsviewpager.CircleIndicator
+        android:id="@+id/indicator"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"
 
+        />
 </RelativeLayout>

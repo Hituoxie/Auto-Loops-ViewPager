@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.imbryk.viewPager.LoopViewPager;
+import com.liz.loopsviewpager.CircleIndicator;
 import com.liz.loopsviewpager.LoopPagerAdapter;
 import com.liz.loopsviewpager.AutoLoopViewPager;
 import com.liz.loopsviewpager.R;
@@ -22,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private LoopViewPager lvpPager;
 
     private AutoLoopViewPager alvpPager;
+    private CircleIndicator indicator;
 
     private static final String TAG = "MainActivity";
 
@@ -74,6 +76,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        indicator.setViewPager(alvpPager);
+
         alvpPager.startAutoLoop();
 
 
@@ -84,6 +88,8 @@ public class MainActivity extends AppCompatActivity {
     private void initView() {
         lvpPager = (LoopViewPager)findViewById(R.id.lvp_pager);
         alvpPager = (AutoLoopViewPager) findViewById(R.id.alvp_pager);
+        indicator = (CircleIndicator)findViewById(R.id.indicator);
+
     }
 
     private void initData() {
