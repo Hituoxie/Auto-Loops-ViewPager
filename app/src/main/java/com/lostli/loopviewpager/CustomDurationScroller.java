@@ -1,5 +1,6 @@
 package com.lostli.loopviewpager;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.animation.Interpolator;
 import android.widget.Scroller;
@@ -27,10 +28,10 @@ public class CustomDurationScroller extends Scroller {
      * @param interpolator
      * @param flywheel
      */
-    // @SuppressLint("NewApi")
-    // public CustomDurationScroller(Context context, Interpolator interpolator, boolean flywheel){
-    // super(context, interpolator, flywheel);
-    // }
+     @SuppressLint("NewApi")
+     public CustomDurationScroller(Context context, Interpolator interpolator, boolean flywheel){
+     super(context, interpolator, flywheel);
+     }
 
     /**
      * Set the factor by which the duration will change

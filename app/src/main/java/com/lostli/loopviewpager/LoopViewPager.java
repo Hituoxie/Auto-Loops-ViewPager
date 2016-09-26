@@ -18,10 +18,6 @@ public class LoopViewPager extends ViewPager {
 
     private LoopPagerAdapterWrapper mAdapter;
 
-    private AutoLoopControl mAutoLoopControl;
-
-    private static final long DEFAULT_INTERVAL = 3000;
-
     public LoopViewPager(Context context) {
         super(context);
         init();
@@ -33,9 +29,8 @@ public class LoopViewPager extends ViewPager {
     }
 
 
-    private void init() {
+    protected void init() {
         super.addOnPageChangeListener(onPageChangeListener);
-
     }
 
     private long downTime = 0;
@@ -58,9 +53,6 @@ public class LoopViewPager extends ViewPager {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        //触摸时停止自动滚动
-        mAutoLoopControl.handlerDispatchTouchEvent(ev);
-
         //解决父listview拦截问题
         switch (MotionEventCompat.getActionMasked(ev)) {
             case MotionEvent.ACTION_DOWN:
@@ -91,7 +83,6 @@ public class LoopViewPager extends ViewPager {
             public void onChanged() {
                 mAdapter.notifyDataSetChanged();
                 setCurrentItem(0, false);
-                mAutoLoopControl.startAutoLoop(DEFAULT_INTERVAL);
             }
         });
         super.setAdapter(mAdapter);
@@ -118,24 +109,6 @@ public class LoopViewPager extends ViewPager {
         if (getCurrentItem() != item) {
             setCurrentItem(item, true);
         }
-    }
-
-    /**
-     * 开始自动滚动
-     * @param interval 滚动间隔时间
-     */
-    public void startAutoLoop(long interval) {
-        if(mAutoLoopControl == null){
-            mAutoLoopControl = new AutoLoopControl(this);
-        }
-        mAutoLoopControl.startAutoLoop(interval);
-    }
-
-    /**
-     * 开始无限循环，间隔时间,默认3000ms
-     */
-    public void startAutoLoop() {
-        startAutoLoop(DEFAULT_INTERVAL);
     }
 
     @Override

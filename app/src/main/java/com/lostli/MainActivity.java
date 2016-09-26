@@ -6,7 +6,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.lostli.loopviewpager.CircleIndicator;
+import com.lostli.indicator.CircleIndicator;
 import com.lostli.loopviewpager.LoopPagerAdapter;
 import com.lostli.loopviewpager.LoopViewPager;
 import com.lostli.loopviewpager.R;
@@ -16,22 +16,22 @@ import java.util.List;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
-    private LoopViewPager alvpPager;
+    private LoopViewPager loopViewPager;
     private CircleIndicator indicator;
 
     private static final String TAG = "MainActivity";
 
-    private String[] img1 = new String[]{"https://cache.hinabian.com/images/release/0/d/02a25e28edcd90154c457939e973c95d.jpg"};
+    private String[] img1 = new String[]{"https://cache.hinabian.com/images/release/0/d/02a25e28edcd90154c457939e973c95d.jpg",
+            "https://cache.hinabian.com/images/release/2/c/2e6c24d41c64294f04bc8828f607afdc.jpg"};
 
     private String[] img2 = new String[]{"https://cache.hinabian.com/images/release/0/d/02a25e28edcd90154c457939e973c95d.jpg",
-            "https://cache.hinabian.com/images/release/1/2/1983130c55d9d36aed35e631037b4e52.jpg",
             "https://cache.hinabian.com/images/release/2/5/2c4a346109468371ce8ebaaf7a157535.jpg",
             "https://cache.hinabian.com/images/release/d/5/d7e438b6c52284a1adbf2f92f432a225.jpg",
             "https://cache.hinabian.com/images/release/2/c/2e6c24d41c64294f04bc8828f607afdc.jpg",
             "https://cache.hinabian.com/images/release/f/6/f3f423b25d79297dc1b48585ad6ad8f6.jpg"};
 
     private String[] img3 = new String[]{"https://cache.hinabian.com/images/release/0/d/02a25e28edcd90154c457939e973c95d.jpg",
-            "https://cache.hinabian.com/images/release/1/2/1983130c55d9d36aed35e631037b4e52.jpg",
+            "https://cache.hinabian.com/images/release/f/6/f3f423b25d79297dc1b48585ad6ad8f6.jpg",
             "https://cache.hinabian.com/images/release/2/5/2c4a346109468371ce8ebaaf7a157535.jpg"};
 
     private List<String> data1 = new ArrayList<>();
@@ -66,16 +66,15 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         };
-        alvpPager.setAdapter(mAdapter);
+        loopViewPager.setAdapter(mAdapter);
 
-        indicator.setViewPager(alvpPager);
+        indicator.setViewPager(loopViewPager);
         mAdapter.registerDataSetObserver(indicator.getDataSetObserver());
-        alvpPager.startAutoLoop();
     }
 
 
     private void initView() {
-        alvpPager = (LoopViewPager) findViewById(R.id.alvp_pager);
+        loopViewPager = (LoopViewPager) findViewById(R.id.alvp_pager);
         indicator = (CircleIndicator)findViewById(R.id.indicator);
     }
 
