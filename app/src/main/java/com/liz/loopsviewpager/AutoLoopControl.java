@@ -68,7 +68,9 @@ public class AutoLoopControl {
      */
     public void startAutoLoop(long interval) {
         this.interval = interval;
-        mHandler = new ScrollHandler();
+        if(mHandler == null){
+            mHandler = new ScrollHandler();
+        }
         sendMessageScrollToNext();
     }
 

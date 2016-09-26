@@ -14,6 +14,7 @@ import com.utils.ImageLoadProxy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
     private LoopViewPager alvpPager;
@@ -38,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private List<String> data2 = new ArrayList<>();
     private List<String> data3 = new ArrayList<>();
 
+    LoopPagerAdapter<String> mAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadData() {
-        alvpPager.setAdapter(new LoopPagerAdapter<String>(this,R.layout.viewpager_image,data3){
+        mAdapter = new LoopPagerAdapter<String>(this,R.layout.viewpager_image,data1){
 
             @Override
             public void bindView(View view, String data, final int position) {
@@ -63,10 +66,11 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             }
-        });
+        };
+        alvpPager.setAdapter(mAdapter);
 
         indicator.setViewPager(alvpPager);
-
+        mAdapter.registerDataSetObserver(indicator.getDataSetObserver());
         alvpPager.startAutoLoop();
     }
 
@@ -90,6 +94,19 @@ public class MainActivity extends AppCompatActivity {
 
 
         ImageLoadProxy.initImageLoader(this);
+    }
+
+    Random r = new Random();
+
+    public void change(View view){
+        int i = r.nextInt(3);
+        if(i == 1){
+            mAdapter.setData(data1);
+        }else if(i == 2){
+            mAdapter.setData(data2);
+        }else{
+            mAdapter.setData(data3);
+        }
     }
 
 }

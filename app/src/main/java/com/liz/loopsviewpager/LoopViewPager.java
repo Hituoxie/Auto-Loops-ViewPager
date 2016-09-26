@@ -1,10 +1,12 @@
 package com.liz.loopsviewpager;
 
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 
 /**
@@ -83,6 +85,15 @@ public class LoopViewPager extends ViewPager {
         }
 
         mAdapter = new LoopPagerAdapterWrapper(adapter);
+
+        adapter.registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                mAdapter.notifyDataSetChanged();
+                setCurrentItem(0, false);
+                mAutoLoopControl.startAutoLoop(DEFAULT_INTERVAL);
+            }
+        });
         super.setAdapter(mAdapter);
         setCurrentItem(0, false);
     }
@@ -145,6 +156,8 @@ public class LoopViewPager extends ViewPager {
 
         @Override
         public void onPageSelected(int position) {
+
+            Log.d("viewpager","onPageSelected:"+position);
 
             int realPosition = mAdapter.toRealPosition(position);
             if (mPreviousPosition != realPosition) {

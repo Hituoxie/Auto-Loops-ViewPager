@@ -20,6 +20,7 @@ import android.os.Parcelable;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +47,7 @@ public class LoopPagerAdapterWrapper extends PagerAdapter{
 
     @Override
     public void notifyDataSetChanged() {
+        mFLItems.clear();
         super.notifyDataSetChanged();
     }
 
@@ -91,6 +93,7 @@ public class LoopPagerAdapterWrapper extends PagerAdapter{
         int realPosition = (mAdapter instanceof FragmentPagerAdapter || mAdapter instanceof FragmentStatePagerAdapter)
                 ? position
                 : toRealPosition(position);
+        Log.d("viewpager","position:"+position);
 
         View view = mFLItems.get(position);
         if (view != null) {
@@ -102,6 +105,7 @@ public class LoopPagerAdapterWrapper extends PagerAdapter{
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
+        Log.d("viewpager","destroyItem:"+position);
         int realFirst = getRealFirstPosition();
         int realLast = getRealLastPosition();
         int realPosition = (mAdapter instanceof FragmentPagerAdapter || mAdapter instanceof FragmentStatePagerAdapter)
@@ -118,7 +122,6 @@ public class LoopPagerAdapterWrapper extends PagerAdapter{
     /*
      * Delegate rest of methods directly to the inner adapter.
      */
-
     @Override
     public void finishUpdate(ViewGroup container) {
         mAdapter.finishUpdate(container);
@@ -148,5 +151,4 @@ public class LoopPagerAdapterWrapper extends PagerAdapter{
     public void setPrimaryItem(ViewGroup container, int position, Object object) {
         mAdapter.setPrimaryItem(container, position, object);
     }
-
 }
