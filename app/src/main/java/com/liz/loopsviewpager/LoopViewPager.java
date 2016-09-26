@@ -1,88 +1,88 @@
-/*
- * Copyright (C) 2013 Leszek Mzyk
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package com.imbryk.viewPager;
+package com.liz.loopsviewpager;
 
 import android.content.Context;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 
 /**
- * A ViewPager subclass enabling infinte scrolling of the viewPager elements
- * 
- * When used for paginating views (in opposite to fragments), no code changes
- * should be needed only change xml's from <android.support.v4.view.ViewPager>
- * to <com.imbryk.viewPager.LoopViewPager>
- * 
- * If "blinking" can be seen when paginating to first or last view, simply call
- * seBoundaryCaching( true ), or change DEFAULT_BOUNDARY_CASHING to true
- * 
- * When using a FragmentPagerAdapter or FragmentStatePagerAdapter,
- * additional changes in the adapter must be done. 
- * The adapter must be prepared to create 2 extra items e.g.:
- * 
- * The original adapter creates 4 items: [0,1,2,3]
- * The modified adapter will have to create 6 items [0,1,2,3,4,5]
- * with mapping realPosition=(position-1)%count
- * [0->3, 1->0, 2->1, 3->2, 4->3, 5->0]
- */
+ * @author li.zhen
+ * @類說明 无限轮播的viewpager,基于LoopingViewpager修改
+ **/
 public class LoopViewPager extends ViewPager {
+    private OnPageChangeListener mOuterPageChangeListener;
 
-    private static final boolean DEFAULT_BOUNDARY_CASHING = false;
-
-    OnPageChangeListener mOuterPageChangeListener;
     private LoopPagerAdapterWrapper mAdapter;
-    private boolean mBoundaryCaching = DEFAULT_BOUNDARY_CASHING;
-    
-    
-    /**
-     * helper function which may be used when implementing FragmentPagerAdapter
-     *   
-     * @param position
-     * @param count
-     * @return (position-1)%count
-     */
-    public static int toRealPosition( int position, int count ){
-        position = position-1;
-        if( position < 0 ){
-            position += count;
-        }else{
-            position = position%count;
-        }
-        return position;
+
+    private AutoLoopControl mAutoLoopControl;
+
+    private static final long DEFAULT_INTERVAL = 3000;
+
+    public LoopViewPager(Context context) {
+        super(context);
+        init();
     }
-    
-    /**
-     * If set to true, the boundary views (i.e. first and last) will never be destroyed
-     * This may help to prevent "blinking" of some views 
-     * 
-     * @param flag
-     */
-    public void setBoundaryCaching(boolean flag) {
-        mBoundaryCaching = flag;
-        if (mAdapter != null) {
-            mAdapter.setBoundaryCaching(flag);
+
+    public LoopViewPager(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init();
+    }
+
+
+    private void init() {
+        super.addOnPageChangeListener(onPageChangeListener);
+
+    }
+
+    private long downTime = 0;
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent arg0) {
+        //长按时拦截点击事件
+        switch (MotionEventCompat.getActionMasked(arg0)) {
+            case MotionEvent.ACTION_DOWN:
+                downTime = System.currentTimeMillis();
+                break;
+
+            case MotionEvent.ACTION_UP:
+                if ((System.currentTimeMillis() - downTime) > 600) {
+                    return true;
+                }
+                break;
         }
+        return super.onInterceptTouchEvent(arg0);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        //触摸时停止自动滚动
+        mAutoLoopControl.handlerDispatchTouchEvent(ev);
+
+        //解决父listview拦截问题
+        switch (MotionEventCompat.getActionMasked(ev)) {
+            case MotionEvent.ACTION_DOWN:
+                getParent().requestDisallowInterceptTouchEvent(true);
+                break;
+            case MotionEvent.ACTION_UP:
+                getParent().requestDisallowInterceptTouchEvent(false);
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                getParent().requestDisallowInterceptTouchEvent(false);
+                break;
+            default:
+                break;
+        }
+        return super.dispatchTouchEvent(ev);
     }
 
     @Override
     public void setAdapter(PagerAdapter adapter) {
+        if (!(adapter instanceof LoopPagerAdapter)) {
+            throw new IllegalArgumentException("adapter must be LoopPagerAdapter instance!");
+        }
+
         mAdapter = new LoopPagerAdapterWrapper(adapter);
-        mAdapter.setBoundaryCaching(mBoundaryCaching);
         super.setAdapter(mAdapter);
         setCurrentItem(0, false);
     }
@@ -109,24 +109,35 @@ public class LoopViewPager extends ViewPager {
         }
     }
 
+    /**
+     * 开始自动滚动
+     * @param interval 滚动间隔时间
+     */
+    public void startAutoLoop(long interval) {
+        if(mAutoLoopControl == null){
+            mAutoLoopControl = new AutoLoopControl(this);
+        }
+        mAutoLoopControl.startAutoLoop(interval);
+    }
+
+    /**
+     * 开始无限循环，间隔时间,默认3000ms
+     */
+    public void startAutoLoop() {
+        startAutoLoop(DEFAULT_INTERVAL);
+    }
+
     @Override
     public void setOnPageChangeListener(OnPageChangeListener listener) {
         mOuterPageChangeListener = listener;
-    };
-
-    public LoopViewPager(Context context) {
-        super(context);
-        init();
     }
 
-    public LoopViewPager(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init();
+    @Override
+    public void addOnPageChangeListener(OnPageChangeListener listener) {
+        mOuterPageChangeListener = listener;
+        //super.addOnPageChangeListener(mOuterPageChangeListener);
     }
 
-    private void init() {
-        super.setOnPageChangeListener(onPageChangeListener);
-    }
 
     private OnPageChangeListener onPageChangeListener = new OnPageChangeListener() {
         private float mPreviousOffset = -1;
@@ -146,7 +157,7 @@ public class LoopViewPager extends ViewPager {
 
         @Override
         public void onPageScrolled(int position, float positionOffset,
-                int positionOffsetPixels) {
+                                   int positionOffsetPixels) {
             int realPosition = position;
             if (mAdapter != null) {
                 realPosition = mAdapter.toRealPosition(position);
@@ -179,6 +190,7 @@ public class LoopViewPager extends ViewPager {
             if (mAdapter != null) {
                 int position = LoopViewPager.super.getCurrentItem();
                 int realPosition = mAdapter.toRealPosition(position);
+
                 if (state == ViewPager.SCROLL_STATE_IDLE
                         && (position == 0 || position == mAdapter.getCount() - 1)) {
                     setCurrentItem(realPosition, false);
@@ -189,5 +201,4 @@ public class LoopViewPager extends ViewPager {
             }
         }
     };
-
 }

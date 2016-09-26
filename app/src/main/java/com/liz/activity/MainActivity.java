@@ -1,18 +1,14 @@
 package com.liz.activity;
 
 import android.os.Bundle;
-import android.support.v4.view.PagerAdapter;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.imbryk.viewPager.LoopViewPager;
 import com.liz.loopsviewpager.CircleIndicator;
 import com.liz.loopsviewpager.LoopPagerAdapter;
-import com.liz.loopsviewpager.AutoLoopViewPager;
+import com.liz.loopsviewpager.LoopViewPager;
 import com.liz.loopsviewpager.R;
 import com.utils.ImageLoadProxy;
 
@@ -20,9 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private LoopViewPager lvpPager;
-
-    private AutoLoopViewPager alvpPager;
+    private LoopViewPager alvpPager;
     private CircleIndicator indicator;
 
     private static final String TAG = "MainActivity";
@@ -56,10 +50,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadData() {
-        lvpPager.setAdapter(new MyAdapter(data1));
-
-        alvpPager.setLoop(false);
-
         alvpPager.setAdapter(new LoopPagerAdapter<String>(this,R.layout.viewpager_image,data3){
 
             @Override
@@ -72,24 +62,18 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this,view.getTag().toString(),Toast.LENGTH_SHORT).show();
                     }
                 });
-
             }
         });
 
         indicator.setViewPager(alvpPager);
 
         alvpPager.startAutoLoop();
-
-
-
     }
 
 
     private void initView() {
-        lvpPager = (LoopViewPager)findViewById(R.id.lvp_pager);
-        alvpPager = (AutoLoopViewPager) findViewById(R.id.alvp_pager);
+        alvpPager = (LoopViewPager) findViewById(R.id.alvp_pager);
         indicator = (CircleIndicator)findViewById(R.id.indicator);
-
     }
 
     private void initData() {
@@ -108,48 +92,4 @@ public class MainActivity extends AppCompatActivity {
         ImageLoadProxy.initImageLoader(this);
     }
 
-    class MyAdapter extends PagerAdapter{
-
-        List<String> data;
-        List<View> views = new ArrayList<>();
-
-        public MyAdapter(List<String> images){
-            data = images;
-        }
-
-        @Override
-        public int getCount() {
-            return data.size();
-        }
-
-        @Override
-        public boolean isViewFromObject(View view, Object object) {
-            return view == object;
-        }
-
-        @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            Log.e(TAG,"instantiateItem:"+position);
-            ImageView iv;
-            if(views.size() == 0){
-                Log.e(TAG,"instantiateItem:new");
-                iv = new ImageView(MainActivity.this);
-                iv.setLayoutParams(new ViewGroup.LayoutParams(-1,-1));
-                iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            }else{
-                Log.e(TAG,"instantiateItem:old");
-                iv = (ImageView) views.remove(0);
-            }
-            ImageLoadProxy.displayImageWithLoadingPicture(data.get(position),iv,android.R.drawable.ic_menu_report_image);
-            container.addView(iv);
-            return iv;
-        }
-
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
-            Log.e(TAG,"destroyItem:"+position);
-            container.removeView((View) object);
-            views.add((View) object);
-        }
-    }
 }

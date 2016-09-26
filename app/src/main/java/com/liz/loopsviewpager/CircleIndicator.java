@@ -20,8 +20,8 @@ import static android.support.v4.view.ViewPager.OnPageChangeListener;
 
 public class CircleIndicator extends LinearLayout {
 
-    private final static int DEFAULT_INDICATOR_WIDTH = 3;
-    private final static int DEFAULT_INDICATOR_MARGIN = 2;
+    private final static int DEFAULT_INDICATOR_WIDTH = 5;
+    private final static int DEFAULT_INDICATOR_MARGIN = 3;
     private ViewPager mViewpager;
     private int mIndicatorMargin = -1;
     private int mIndicatorWidth = -1;
