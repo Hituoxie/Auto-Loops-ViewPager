@@ -16,11 +16,15 @@ import java.util.List;
 public abstract class LoopPagerAdapter<T> extends PagerAdapter{
 
     /**
-     * 缓存View
+     * 缓存View，当list的数据很多时也不会内存溢出
      */
-    private LinkedList<Object> mViews = new LinkedList<>();
+    private LinkedList<View> mViews = new LinkedList<>();
 
-    private SparseArray<Object> mViewItems = new SparseArray<>();
+    /**
+     * 单独缓存第一页和最后一页<br/>
+     * 为了解决最后一页切换到第1页时有些动画闪烁的问题
+     */
+    private SparseArray<View> mFLItems = new SparseArray<>();
 
     private Context mContext;
     private List<T> mData;
@@ -95,38 +99,59 @@ public abstract class LoopPagerAdapter<T> extends PagerAdapter{
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
         int realPosition =  isLoop ? getRealPosition(position) : position;
+        int realFirst = getRealFirstPosition();
+        int realLast = getRealLastPosition();
 
-        View view = getViewFromCache(container,position);
+        View view;
 
-        bindView(view,mData.get(realPosition),realPosition);
-
-        container.addView(view);
+        if (position == realFirst || position == realLast) {
+            view = getFristOrLastView(position);
+            if(view.getParent() == null){
+                container.addView(view);
+                bindView(view,mData.get(realPosition),realPosition);
+            }
+        } else {
+            view = getViewFromCache();
+            container.addView(view);
+            bindView(view,mData.get(realPosition),realPosition);
+        }
 
         return view;
     }
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
-        container.removeView((View) object);
-        //mViews.addLast(object);
-        //mViewItems.put(position,object);
+        int realFirst = getRealFirstPosition();
+        int realLast = getRealLastPosition();
+
+        if (position != realFirst && position != realLast) {
+            container.removeView((View) object);
+            mViews.addLast((View) object);
+        }
     }
 
-    private View getViewFromCache(ViewGroup container,int position){
-        View view = null;
-
-        /*if(mViews.size() > 1){
-            view = (View) mViews.removeFirst();
-        }*/
-
-        view = (View)mViewItems.get(position);
+    private View getFristOrLastView(int position){
+        View view = mFLItems.get(position);
 
         if(view == null){
             view = View.inflate(mContext,mLayoutId,null);
-            mViewItems.put(position,view);
+            mFLItems.put(position,view);
         }
 
         return view;
+    }
+
+    private View getViewFromCache(){
+        View view;
+
+        if(mViews.size() > 1){
+            view = mViews.removeFirst();
+        }else{
+            view = View.inflate(mContext,mLayoutId,null);
+        }
+
+        return view;
+
     }
 
     abstract public void bindView(View view, T data, int position);

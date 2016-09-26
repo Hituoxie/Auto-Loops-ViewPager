@@ -201,7 +201,7 @@ public class AutoLoopViewPager extends ViewPager {
 
         mAdapter.notifyDataSetChanged();
 
-        //setPageTransformer(true, new ZoomOutPageTransformer());
+        setPageTransformer(true, new ZoomOutPageTransformer());
 
         mHandler = new ScrollHandler(this);
 
@@ -250,7 +250,6 @@ public class AutoLoopViewPager extends ViewPager {
             Log.d(TAG, "positionOffset=" + positionOffset + "==>positionOffsetPixels=" + positionOffsetPixels);
 
             int realPosition = position;
-
             if (isLoop) {
                 if (mAdapter != null) {
                     realPosition = mAdapter.getRealPosition(position);
