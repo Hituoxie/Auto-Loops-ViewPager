@@ -1,4 +1,4 @@
-package com.utils;
+package com.lostli;
 
 import android.content.Context;
 import android.graphics.Bitmap;

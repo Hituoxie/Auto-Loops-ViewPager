@@ -1,4 +1,4 @@
-package com.liz.activity;
+package com.lostli;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -6,11 +6,10 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.liz.loopsviewpager.CircleIndicator;
-import com.liz.loopsviewpager.LoopPagerAdapter;
-import com.liz.loopsviewpager.LoopViewPager;
-import com.liz.loopsviewpager.R;
-import com.utils.ImageLoadProxy;
+import com.lostli.loopviewpager.CircleIndicator;
+import com.lostli.loopviewpager.LoopPagerAdapter;
+import com.lostli.loopviewpager.LoopViewPager;
+import com.lostli.loopviewpager.R;
 
 import java.util.ArrayList;
 import java.util.List;

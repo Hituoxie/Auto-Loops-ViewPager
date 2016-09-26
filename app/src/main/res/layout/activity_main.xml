@@ -5,13 +5,13 @@
     android:layout_height="match_parent"
     >
 
-    <com.liz.loopsviewpager.LoopViewPager
+    <com.lostli.loopviewpager.LoopViewPager
         android:id="@+id/alvp_pager"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:background="#ccbbcc"
         />
-    <com.liz.loopsviewpager.CircleIndicator
+    <com.lostli.loopviewpager.CircleIndicator
         android:id="@+id/indicator"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
