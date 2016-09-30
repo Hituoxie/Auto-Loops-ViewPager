@@ -1,4 +1,4 @@
-package com.lostli.activity;
+package com.lostli;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.lostli.ImageLoadProxy;
 import com.lostli.indicator.CircleIndicator;
 import com.lostli.loopviewpager.LoopPagerAdapter;
 import com.lostli.loopviewpager.LoopViewPager;

@@ -78,6 +78,10 @@ public class AutoLoopControl {
         sendMessageScrollToNext();
     }
 
+    public void stopAutoLoop(){
+        stopScrollToNext();
+    }
+
     private void scrollToNext() {
         mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1, true);
     }
