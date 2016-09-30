@@ -1,7 +1,6 @@
 package com.lostli.loopviewpager;
 
 import android.content.Context;
-import android.database.DataSetObserver;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -14,6 +13,10 @@ import android.view.MotionEvent;
  * @類說明 无限轮播的viewpager,基于LoopingViewpager修改
  **/
 public class LoopViewPager extends ViewPager {
+    private AutoLoopControl mAutoLoopControl;
+    private static final long DEFAULT_INTERVAL = 3000;
+    private long mInterval = DEFAULT_INTERVAL;
+
     private OnPageChangeListener mOuterPageChangeListener;
 
     private LoopPagerAdapterWrapper mAdapter;
@@ -27,7 +30,6 @@ public class LoopViewPager extends ViewPager {
         super(context, attrs);
         init();
     }
-
 
     protected void init() {
         super.addOnPageChangeListener(onPageChangeListener);
@@ -53,6 +55,11 @@ public class LoopViewPager extends ViewPager {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        //触摸时停止自动滚动
+        if(mAutoLoopControl!=null){
+            mAutoLoopControl.handlerDispatchTouchEvent(ev);
+        }
+
         //解决父listview拦截问题
         switch (MotionEventCompat.getActionMasked(ev)) {
             case MotionEvent.ACTION_DOWN:
@@ -70,21 +77,36 @@ public class LoopViewPager extends ViewPager {
         return super.dispatchTouchEvent(ev);
     }
 
+    /**
+     * 开始自动滚动，间隔时间,默认3000ms
+     */
+    public void startAutoLoop() {
+        startAutoLoop(DEFAULT_INTERVAL);
+    }
+
+    /**
+     * 开始自动滚动
+     * @param interval 滚动间隔时间 ms
+     */
+    public void startAutoLoop(long interval) {
+        mInterval = interval;
+        if(mAutoLoopControl == null){
+            mAutoLoopControl = new AutoLoopControl(this);
+        }
+        mAutoLoopControl.startAutoLoop(mInterval);
+    }
+
     @Override
     public void setAdapter(PagerAdapter adapter) {
         if (!(adapter instanceof LoopPagerAdapter)) {
             throw new IllegalArgumentException("adapter must be LoopPagerAdapter instance!");
         }
 
-        mAdapter = new LoopPagerAdapterWrapper(adapter);
+        final LoopPagerAdapter loopPagerAdapter = (LoopPagerAdapter)adapter;
+        loopPagerAdapter.bindViewPager(this);
 
-        adapter.registerDataSetObserver(new DataSetObserver() {
-            @Override
-            public void onChanged() {
-                mAdapter.notifyDataSetChanged();
-                setCurrentItem(0, false);
-            }
-        });
+        mAdapter = new LoopPagerAdapterWrapper(loopPagerAdapter);
+
         super.setAdapter(mAdapter);
         setCurrentItem(0, false);
     }

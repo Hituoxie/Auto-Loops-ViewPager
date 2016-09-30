@@ -5,7 +5,6 @@ import android.support.v4.view.PagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,17 +20,20 @@ public abstract class LoopPagerAdapter<T> extends PagerAdapter{
     private LinkedList<View> mViews = new LinkedList<>();
 
     private Context mContext;
-    private List<T> mData = new ArrayList<>();
+    private List<T> mData;
     private int mLayoutId;
+
+    private LoopViewPager mLoopViewPager;
+
+    private AdapterObserver mAdapterObserver;
 
     public LoopPagerAdapter(Context context, int layoutId, List<T> data){
         if(data == null){
             throw new IllegalArgumentException("data can't be null!");
         }
-
+        mData = data;
         mContext = context;
         mLayoutId = layoutId;
-        setData(data);
     }
 
     @Override
@@ -68,22 +70,43 @@ public abstract class LoopPagerAdapter<T> extends PagerAdapter{
         mViews.addLast((View) object);
     }
 
-    public void setData(List<T> data){
-        mData.clear();
-        mData.addAll(data);
-        mViews.clear();
-        notifyDataSetChanged();
-    }
-
-    public List<T> getData(){
-        return mData;
-    }
-
     @Override
     public void notifyDataSetChanged() {
         super.notifyDataSetChanged();
     }
 
+    public void changeData(List<T> data){
+        LoopPagerAdapter<T> mNewInstance = new LoopPagerAdapter<T>(mContext,mLayoutId,data) {
+            @Override
+            public void bindView(View view, T data, int position) {
+                LoopPagerAdapter.this.bindView(view,data,position);
+            }
+        } ;
+
+        /*if(mAdapterObserver != null){
+            mAdapterObserver.onAdapterChange(mNewInstance);
+        }*/
+
+        if(mLoopViewPager != null){
+            mLoopViewPager.setAdapter(mNewInstance);
+        }
+
+        notifyDataSetChanged();
+    }
+
+
     abstract public void bindView(View view, T data, int position);
+
+    public void registerAdapterObserver(AdapterObserver observer) {
+        mAdapterObserver = observer;
+    }
+
+    interface AdapterObserver{
+        void onAdapterChange(LoopPagerAdapter newAdapter);
+    }
+
+    public void bindViewPager(LoopViewPager loopViewPager){
+        mLoopViewPager = loopViewPager;
+    }
 
 }

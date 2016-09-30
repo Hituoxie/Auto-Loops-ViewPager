@@ -1,10 +1,12 @@
 package com.lostli.loopviewpager;
 
+import android.content.Context;
 import android.os.Handler;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewPager;
 import android.view.MotionEvent;
 import android.view.animation.Interpolator;
+import android.widget.Scroller;
 
 import java.lang.reflect.Field;
 
@@ -16,8 +18,10 @@ public class AutoLoopControl {
     private static final int WHAT_SHOW_NEXT = 1;
 
     private Handler mHandler;
-    private CustomDurationScroller scroller = null;
+
     private ViewPager mViewPager;
+
+    private CustomDurationScroller scroller = null;
 
     /**
      * 轮播间隔时间
@@ -39,7 +43,7 @@ public class AutoLoopControl {
             Field interpolatorField = ViewPager.class.getDeclaredField("sInterpolator");
             interpolatorField.setAccessible(true);
             scroller = new CustomDurationScroller(mViewPager.getContext(), (Interpolator) interpolatorField.get(null));
-            scrollerField.set(this, scroller);
+            scrollerField.set(mViewPager, scroller);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -104,6 +108,31 @@ public class AutoLoopControl {
                 scroller.setScrollDurationFactor(1f);
                 sendMessageScrollToNext();
             }
+        }
+    }
+
+    /**
+     * @author Li.z
+     * @類說明
+     **/
+    public class CustomDurationScroller extends Scroller {
+
+        private double scrollFactor = 1;
+
+        public CustomDurationScroller(Context context, Interpolator interpolator) {
+            super(context, interpolator);
+        }
+
+        /**
+         * Set the factor by which the duration will change
+         */
+        public void setScrollDurationFactor(double scrollFactor) {
+            this.scrollFactor = scrollFactor;
+        }
+
+        @Override
+        public void startScroll(int startX, int startY, int dx, int dy, int duration) {
+            super.startScroll(startX, startY, dx, dy, (int)(duration * scrollFactor));
         }
     }
 }

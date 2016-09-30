@@ -1,11 +1,13 @@
-package com.lostli;
+package com.lostli.activity;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.lostli.ImageLoadProxy;
 import com.lostli.indicator.CircleIndicator;
 import com.lostli.loopviewpager.LoopPagerAdapter;
 import com.lostli.loopviewpager.LoopViewPager;
@@ -34,9 +36,13 @@ public class MainActivity extends AppCompatActivity {
             "https://cache.hinabian.com/images/release/f/6/f3f423b25d79297dc1b48585ad6ad8f6.jpg",
             "https://cache.hinabian.com/images/release/2/5/2c4a346109468371ce8ebaaf7a157535.jpg"};
 
+    private String[] img4 = new String[]{
+            "https://cache.hinabian.com/images/release/2/5/2c4a346109468371ce8ebaaf7a157535.jpg"};
+
     private List<String> data1 = new ArrayList<>();
     private List<String> data2 = new ArrayList<>();
     private List<String> data3 = new ArrayList<>();
+    private List<String> data4 = new ArrayList<>();
 
     LoopPagerAdapter<String> mAdapter;
 
@@ -52,26 +58,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadData() {
-        mAdapter = new LoopPagerAdapter<String>(this,R.layout.viewpager_image,data1){
-
-            @Override
-            public void bindView(View view, String data, final int position) {
-                ImageLoadProxy.displayImageWithLoadingPicture(data,(ImageView)view,android.R.drawable.ic_menu_report_image);
-                view.setTag(position);
-                view.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Toast.makeText(MainActivity.this,view.getTag().toString(),Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        };
+        mAdapter = new MyAdapter(this,data1);
         loopViewPager.setAdapter(mAdapter);
-
         indicator.setViewPager(loopViewPager);
         mAdapter.registerDataSetObserver(indicator.getDataSetObserver());
+        loopViewPager.startAutoLoop();
     }
-
 
     private void initView() {
         loopViewPager = (LoopViewPager) findViewById(R.id.alvp_pager);
@@ -89,7 +81,9 @@ public class MainActivity extends AppCompatActivity {
         for(String url:img3){
             data3.add(url);
         }
-
+        for(String url:img4){
+            data4.add(url);
+        }
 
         ImageLoadProxy.initImageLoader(this);
     }
@@ -97,13 +91,51 @@ public class MainActivity extends AppCompatActivity {
     Random r = new Random();
 
     public void change(View view){
-        int i = r.nextInt(3);
-        if(i == 1){
-            mAdapter.setData(data1);
+        int i = r.nextInt(4);
+        /*if(i == 1){
+            mAdapter = new MyAdapter(this,data1);
+            loopViewPager.setAdapter(mAdapter);
+            indicator.setViewPager(loopViewPager);
         }else if(i == 2){
-            mAdapter.setData(data2);
+            mAdapter = new MyAdapter(this,data2);
+            loopViewPager.setAdapter(mAdapter);
+            indicator.setViewPager(loopViewPager);
+        }else if(i == 3){
+            mAdapter = new MyAdapter(this,data3);
+            loopViewPager.setAdapter(mAdapter);
+            indicator.setViewPager(loopViewPager);
         }else{
-            mAdapter.setData(data3);
+            mAdapter = new MyAdapter(this,data4);
+            loopViewPager.setAdapter(mAdapter);
+            indicator.setViewPager(loopViewPager);
+        }*/
+        if(i == 1){
+            mAdapter.changeData(data1);
+        }else if(i == 2){
+            mAdapter.changeData(data2);
+        }else if(i == 3){
+            mAdapter.changeData(data3);
+        }else{
+            mAdapter.changeData(data4);
+        }
+    }
+
+    class MyAdapter extends LoopPagerAdapter<String>{
+
+        public MyAdapter(Context context,List<String> data){
+            super(context,R.layout.viewpager_image,data);
+        }
+
+        @Override
+        public void bindView(View view, String data, final int position) {
+            ImageLoadProxy.displayImageWithLoadingPicture(data,(ImageView)view);
+            view.setTag(position);
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Toast.makeText(MainActivity.this,view.getTag().toString(),Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
 

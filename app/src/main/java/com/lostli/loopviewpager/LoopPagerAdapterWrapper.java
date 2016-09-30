@@ -41,13 +41,15 @@ public class LoopPagerAdapterWrapper extends PagerAdapter{
      */
     private SparseArray<View> mFLItems = new SparseArray<>();
 
+    private ViewGroup container;
+
     public LoopPagerAdapterWrapper(PagerAdapter adapter) {
         this.mAdapter = adapter;
     }
 
     @Override
     public void notifyDataSetChanged() {
-        mFLItems.clear();
+        //mFLItems.clear();
         super.notifyDataSetChanged();
     }
 
@@ -90,6 +92,10 @@ public class LoopPagerAdapterWrapper extends PagerAdapter{
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
+        if(container == null){
+            this.container = container;
+        }
+
         int realPosition = (mAdapter instanceof FragmentPagerAdapter || mAdapter instanceof FragmentStatePagerAdapter)
                 ? position
                 : toRealPosition(position);
