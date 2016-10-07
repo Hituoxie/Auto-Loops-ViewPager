@@ -10,7 +10,8 @@ import android.view.MotionEvent;
 
 /**
  * @author li.zhen
- * @類說明 无限轮播的viewpager,基于LoopingViewpager修改
+ * @類說明 无限轮播的viewpager,基于LoopingViewpager修改<br/>
+ *         如果修改Data需要重新设置adapter
  **/
 public class  LoopViewPager extends ViewPager {
     private AutoLoopControl mAutoLoopControl;
@@ -96,6 +97,12 @@ public class  LoopViewPager extends ViewPager {
         mAutoLoopControl.startAutoLoop(mInterval);
     }
 
+    public void stopAutoLoop(){
+        if(mAutoLoopControl != null){
+            mAutoLoopControl.stopAutoLoop();
+        }
+    }
+
     @Override
     public void setAdapter(PagerAdapter adapter) {
         if (!(adapter instanceof LoopPagerAdapter)) {
@@ -103,25 +110,15 @@ public class  LoopViewPager extends ViewPager {
         }
 
         final LoopPagerAdapter loopPagerAdapter = (LoopPagerAdapter)adapter;
-        loopPagerAdapter.bindViewPager(this);
 
         mAdapter = new LoopPagerAdapterWrapper(loopPagerAdapter);
 
         super.setAdapter(mAdapter);
         setCurrentItem(0, false);
-    }
 
-    public void changeAdapter(PagerAdapter adapter){
-        if(mAutoLoopControl != null){
-            mAutoLoopControl.stopAutoLoop();
-        }
-
-        setAdapter(adapter);
-
-        if(mAutoLoopControl != null){
+        if(mAutoLoopControl !=null){
             mAutoLoopControl.startAutoLoop(mInterval);
         }
-
     }
 
     @Override

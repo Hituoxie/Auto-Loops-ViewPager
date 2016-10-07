@@ -25,12 +25,6 @@ import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 
-/**
- * A PagerAdapter wrapper responsible for providing a proper page to
- * LoopViewPager
- * <p>
- * This class shouldn't be used directly
- */
 public class LoopPagerAdapterWrapper extends PagerAdapter{
 
     private PagerAdapter mAdapter;
@@ -49,7 +43,6 @@ public class LoopPagerAdapterWrapper extends PagerAdapter{
 
     @Override
     public void notifyDataSetChanged() {
-        //mFLItems.clear();
         super.notifyDataSetChanged();
     }
 
@@ -125,9 +118,7 @@ public class LoopPagerAdapterWrapper extends PagerAdapter{
         }
     }
 
-    /*
-     * Delegate rest of methods directly to the inner adapter.
-     */
+
     @Override
     public void finishUpdate(ViewGroup container) {
         mAdapter.finishUpdate(container);

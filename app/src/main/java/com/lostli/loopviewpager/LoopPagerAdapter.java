@@ -23,8 +23,6 @@ public abstract class LoopPagerAdapter<T> extends PagerAdapter{
     private List<T> mData;
     private int mLayoutId;
 
-    private LoopViewPager mLoopViewPager;
-
     public LoopPagerAdapter(Context context, int layoutId, List<T> data){
         if(data == null){
             throw new IllegalArgumentException("data can't be null!");
@@ -32,6 +30,10 @@ public abstract class LoopPagerAdapter<T> extends PagerAdapter{
         mData = data;
         mContext = context;
         mLayoutId = layoutId;
+    }
+
+    public List<T> getData(){
+        return mData;
     }
 
     @Override
@@ -68,28 +70,5 @@ public abstract class LoopPagerAdapter<T> extends PagerAdapter{
         mViews.addLast((View) object);
     }
 
-    /**修改数据
-     * @param data
-     */
-    public void changeData(List<T> data){
-        LoopPagerAdapter<T> mNewInstance = new LoopPagerAdapter<T>(mContext,mLayoutId,data) {
-            @Override
-            public void bindView(View view, T data, int position) {
-                LoopPagerAdapter.this.bindView(view,data,position);
-            }
-        } ;
-
-        if(mLoopViewPager != null){
-            mLoopViewPager.changeAdapter(mNewInstance);
-        }
-
-        notifyDataSetChanged();
-    }
-
     abstract public void bindView(View view, T data, int position);
-
-    public void bindViewPager(LoopViewPager loopViewPager){
-        mLoopViewPager = loopViewPager;
-    }
-
 }

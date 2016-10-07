@@ -3,6 +3,7 @@ package com.lostli;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -60,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new MyAdapter(this,data1);
         loopViewPager.setAdapter(mAdapter);
         indicator.setViewPager(loopViewPager);
-        mAdapter.registerDataSetObserver(indicator.getDataSetObserver());
         loopViewPager.startAutoLoop();
     }
 
@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void change(View view){
         int i = r.nextInt(4);
-        /*if(i == 1){
+        if(i == 1){
             mAdapter = new MyAdapter(this,data1);
             loopViewPager.setAdapter(mAdapter);
             indicator.setViewPager(loopViewPager);
@@ -107,15 +107,6 @@ public class MainActivity extends AppCompatActivity {
             mAdapter = new MyAdapter(this,data4);
             loopViewPager.setAdapter(mAdapter);
             indicator.setViewPager(loopViewPager);
-        }*/
-        if(i == 1){
-            mAdapter.changeData(data1);
-        }else if(i == 2){
-            mAdapter.changeData(data2);
-        }else if(i == 3){
-            mAdapter.changeData(data3);
-        }else{
-            mAdapter.changeData(data4);
         }
     }
 
@@ -132,7 +123,9 @@ public class MainActivity extends AppCompatActivity {
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Toast.makeText(MainActivity.this,view.getTag().toString(),Toast.LENGTH_SHORT).show();
+                    int position = (int)view.getTag();
+                    Toast.makeText(MainActivity.this,position+"",Toast.LENGTH_SHORT).show();
+                    Log.d(TAG,getData().get(position));
                 }
             });
         }
