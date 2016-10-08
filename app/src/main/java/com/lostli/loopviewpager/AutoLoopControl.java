@@ -23,10 +23,13 @@ public class AutoLoopControl {
 
     private CustomDurationScroller scroller = null;
 
+    private static final long DEFAULT_INTERVAL = 3000;
+    private long mInterval = DEFAULT_INTERVAL;
+
     /**
-     * 轮播间隔时间
+     * 是否自动滚动
      */
-    private long interval;
+    private boolean isAutoLoop = false;
 
     public AutoLoopControl(ViewPager viewPager) {
         mViewPager = viewPager;
@@ -56,10 +59,14 @@ public class AutoLoopControl {
                 stopScrollToNext();
                 break;
             case MotionEvent.ACTION_UP:
-                sendMessageScrollToNext();
+                if(isAutoLoop()){
+                    sendMessageScrollToNext();
+                }
                 break;
             case MotionEvent.ACTION_CANCEL:
-                sendMessageScrollToNext();
+                if(isAutoLoop()){
+                    sendMessageScrollToNext();
+                }
                 break;
             default:
                 break;
@@ -71,15 +78,25 @@ public class AutoLoopControl {
      * @param interval 间隔时间
      */
     public void startAutoLoop(long interval) {
-        this.interval = interval;
+        mInterval = interval;
+        isAutoLoop = true;
         if(mHandler == null){
             mHandler = new ScrollHandler();
         }
         sendMessageScrollToNext();
     }
 
+    public void startAutoLoop() {
+        startAutoLoop(mInterval);
+    }
+
     public void stopAutoLoop(){
+        isAutoLoop = false;
         stopScrollToNext();
+    }
+
+    public boolean isAutoLoop(){
+        return  isAutoLoop;
     }
 
     private void scrollToNext() {
@@ -95,7 +112,7 @@ public class AutoLoopControl {
     private void sendMessageScrollToNext() {
         if (mHandler != null) {
             mHandler.removeMessages(WHAT_SHOW_NEXT);
-            mHandler.sendEmptyMessageDelayed(WHAT_SHOW_NEXT, interval);
+            mHandler.sendEmptyMessageDelayed(WHAT_SHOW_NEXT, mInterval);
         }
     }
 

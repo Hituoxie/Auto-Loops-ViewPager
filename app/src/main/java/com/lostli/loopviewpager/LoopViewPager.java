@@ -15,11 +15,7 @@ import android.view.MotionEvent;
  **/
 public class  LoopViewPager extends ViewPager {
     private AutoLoopControl mAutoLoopControl;
-    private static final long DEFAULT_INTERVAL = 3000;
-    private long mInterval = DEFAULT_INTERVAL;
-
     private OnPageChangeListener mOuterPageChangeListener;
-
     private LoopPagerAdapterWrapper mAdapter;
 
     public LoopViewPager(Context context) {
@@ -79,10 +75,13 @@ public class  LoopViewPager extends ViewPager {
     }
 
     /**
-     * 开始自动滚动，间隔时间,默认3000ms
+     * 开始自动滚动，间隔时间,默认3000m或者上一次设置的时间
      */
     public void startAutoLoop() {
-        startAutoLoop(DEFAULT_INTERVAL);
+        if(mAutoLoopControl == null){
+            mAutoLoopControl = new AutoLoopControl(this);
+        }
+        mAutoLoopControl.startAutoLoop();
     }
 
     /**
@@ -90,11 +89,10 @@ public class  LoopViewPager extends ViewPager {
      * @param interval 滚动间隔时间 ms
      */
     public void startAutoLoop(long interval) {
-        mInterval = interval;
         if(mAutoLoopControl == null){
             mAutoLoopControl = new AutoLoopControl(this);
         }
-        mAutoLoopControl.startAutoLoop(mInterval);
+        mAutoLoopControl.startAutoLoop(interval);
     }
 
     public void stopAutoLoop(){
@@ -116,8 +114,9 @@ public class  LoopViewPager extends ViewPager {
         super.setAdapter(mAdapter);
         setCurrentItem(0, false);
 
-        if(mAutoLoopControl !=null){
-            mAutoLoopControl.startAutoLoop(mInterval);
+        //重置滚动时间
+        if(mAutoLoopControl !=null && mAutoLoopControl.isAutoLoop()){
+            mAutoLoopControl.startAutoLoop();
         }
     }
 
