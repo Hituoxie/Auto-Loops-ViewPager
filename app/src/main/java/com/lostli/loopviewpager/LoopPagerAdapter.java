@@ -36,6 +36,10 @@ public abstract class LoopPagerAdapter<T> extends PagerAdapter{
         return mData;
     }
 
+    public Context getContext(){
+        return mContext;
+    }
+
     @Override
     public int getCount() {
         return mData.size();
