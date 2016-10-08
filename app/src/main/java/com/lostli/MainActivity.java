@@ -23,21 +23,21 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
-    private String[] img1 = new String[]{"https://cache.hinabian.com/images/release/0/d/02a25e28edcd90154c457939e973c95d.jpg",
-            "https://cache.hinabian.com/images/release/2/c/2e6c24d41c64294f04bc8828f607afdc.jpg"};
+    private String[] img1 = new String[]{"http://img5.imgtn.bdimg.com/it/u=1086421488,1409978417&fm=21&gp=0.jpg",
+            "http://img4.imgtn.bdimg.com/it/u=3844331837,3157143639&fm=21&gp=0.jpg"};
 
-    private String[] img2 = new String[]{"https://cache.hinabian.com/images/release/0/d/02a25e28edcd90154c457939e973c95d.jpg",
-            "https://cache.hinabian.com/images/release/2/5/2c4a346109468371ce8ebaaf7a157535.jpg",
-            "https://cache.hinabian.com/images/release/d/5/d7e438b6c52284a1adbf2f92f432a225.jpg",
-            "https://cache.hinabian.com/images/release/2/c/2e6c24d41c64294f04bc8828f607afdc.jpg",
-            "https://cache.hinabian.com/images/release/f/6/f3f423b25d79297dc1b48585ad6ad8f6.jpg"};
+    private String[] img2 = new String[]{"http://img3.imgtn.bdimg.com/it/u=536877195,2546372538&fm=21&gp=0.jpg",
+            "http://img4.imgtn.bdimg.com/it/u=748730780,762499706&fm=21&gp=0.jpg",
+            "http://pic.35pic.com/10/60/48/55b1OOOPIC31.jpg",
+            "http://img5.imgtn.bdimg.com/it/u=1086421488,1409978417&fm=21&gp=0.jpg",
+            "http://img4.imgtn.bdimg.com/it/u=3844331837,3157143639&fm=21&gp=0.jpg"};
 
-    private String[] img3 = new String[]{"https://cache.hinabian.com/images/release/0/d/02a25e28edcd90154c457939e973c95d.jpg",
-            "https://cache.hinabian.com/images/release/f/6/f3f423b25d79297dc1b48585ad6ad8f6.jpg",
-            "https://cache.hinabian.com/images/release/2/5/2c4a346109468371ce8ebaaf7a157535.jpg"};
+    private String[] img3 = new String[]{"http://img4.imgtn.bdimg.com/it/u=3844331837,3157143639&fm=21&gp=0.jpg",
+            "http://img5.imgtn.bdimg.com/it/u=1086421488,1409978417&fm=21&gp=0.jpg",
+            "http://img4.imgtn.bdimg.com/it/u=748730780,762499706&fm=21&gp=0.jpg"};
 
     private String[] img4 = new String[]{
-            "https://cache.hinabian.com/images/release/2/5/2c4a346109468371ce8ebaaf7a157535.jpg"};
+            "http://pic.35pic.com/10/60/48/55b1OOOPIC31.jpg"};
 
     private List<String> data1 = new ArrayList<>();
     private List<String> data2 = new ArrayList<>();
