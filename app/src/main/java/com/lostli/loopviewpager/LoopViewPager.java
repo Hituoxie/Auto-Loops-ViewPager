@@ -50,6 +50,9 @@ public class  LoopViewPager extends ViewPager {
         return super.onInterceptTouchEvent(arg0);
     }
 
+    float mDownX;
+    float mDownY;
+
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         //触摸时停止自动滚动
@@ -60,7 +63,20 @@ public class  LoopViewPager extends ViewPager {
         //解决父listview拦截问题
         switch (MotionEventCompat.getActionMasked(ev)) {
             case MotionEvent.ACTION_DOWN:
+                mDownX = ev.getX();
+                mDownY = ev.getY();
                 getParent().requestDisallowInterceptTouchEvent(true);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if(scrollState == ViewPager.SCROLL_STATE_DRAGGING){
+                    getParent().requestDisallowInterceptTouchEvent(true);
+                    break;
+                }
+                if(Math.abs(ev.getX()-mDownX) > Math.abs(ev.getY()-mDownX)){
+                    getParent().requestDisallowInterceptTouchEvent(true);
+                }else{
+                    getParent().requestDisallowInterceptTouchEvent(false);
+                }
                 break;
             case MotionEvent.ACTION_UP:
                 getParent().requestDisallowInterceptTouchEvent(false);
@@ -154,6 +170,9 @@ public class  LoopViewPager extends ViewPager {
     }
 
 
+
+    int scrollState;
+
     private OnPageChangeListener onPageChangeListener = new OnPageChangeListener() {
         private float mPreviousOffset = -1;
         private float mPreviousPosition = -1;
@@ -204,6 +223,7 @@ public class  LoopViewPager extends ViewPager {
 
         @Override
         public void onPageScrollStateChanged(int state) {
+            scrollState = state;
             if (mAdapter != null) {
                 int position = LoopViewPager.super.getCurrentItem();
                 int realPosition = mAdapter.toRealPosition(position);
@@ -218,6 +238,4 @@ public class  LoopViewPager extends ViewPager {
             }
         }
     };
-
-
 }
