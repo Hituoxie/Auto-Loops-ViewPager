@@ -128,6 +128,9 @@ public class  LoopViewPager extends ViewPager {
         mAdapter = new LoopPagerAdapterWrapper(loopPagerAdapter);
 
         super.setAdapter(mAdapter);
+        //有些系统不notify一下会报错
+        mAdapter.notifyDataSetChanged();
+
         setCurrentItem(0, false);
 
         //重置滚动时间
