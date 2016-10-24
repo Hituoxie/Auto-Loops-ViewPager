@@ -17,15 +17,12 @@
 package com.lostli.loopviewpager;
 
 import android.os.Parcelable;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class LoopPagerAdapterWrapper extends PagerAdapter{
+public class LoopPagerAdapterWrapper extends PagerAdapter {
 
     private PagerAdapter mAdapter;
 
@@ -34,8 +31,6 @@ public class LoopPagerAdapterWrapper extends PagerAdapter{
      * 为了解决最后一页切换到第1页时有些动画闪烁的问题
      */
     private SparseArray<View> mFLItems = new SparseArray<>();
-
-    private ViewGroup container;
 
     public LoopPagerAdapterWrapper(PagerAdapter adapter) {
         this.mAdapter = adapter;
@@ -88,14 +83,11 @@ public class LoopPagerAdapterWrapper extends PagerAdapter{
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        if(container == null){
-            this.container = container;
+        if(getRealCount() == 0){
+            return null;
         }
 
-        int realPosition = (mAdapter instanceof FragmentPagerAdapter || mAdapter instanceof FragmentStatePagerAdapter)
-                ? position
-                : toRealPosition(position);
-        Log.d("viewpager","position:"+position);
+        int realPosition = toRealPosition(position);
 
         View view = mFLItems.get(position);
         if (view != null) {
@@ -107,12 +99,12 @@ public class LoopPagerAdapterWrapper extends PagerAdapter{
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
-        Log.d("viewpager","destroyItem:"+position);
+        if(getRealCount() == 0){
+            return;
+        }
         int realFirst = getRealFirstPosition();
         int realLast = getRealLastPosition();
-        int realPosition = (mAdapter instanceof FragmentPagerAdapter || mAdapter instanceof FragmentStatePagerAdapter)
-                ? position
-                : toRealPosition(position);
+        int realPosition = toRealPosition(position);
 
         if (position == realFirst || position == realLast) {
             mFLItems.put(position,(View)object);

@@ -7,13 +7,14 @@ import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 
 /**
  * @author li.zhen
- * @類說明 无限轮播的viewpager,基于LoopingViewpager修改<br/>
- *         如果修改Data需要重新设置adapter
+ * @類說明 无限轮播的viewpager, 基于LoopingViewpager修改<br/>
+ * 如果修改Data需要重新设置adapter
  **/
-public class  LoopViewPager extends ViewPager {
+public class LoopViewPager extends ViewPager {
     private AutoLoopControl mAutoLoopControl;
     private OnPageChangeListener mOuterPageChangeListener;
     private LoopPagerAdapterWrapper mAdapter;
@@ -30,9 +31,11 @@ public class  LoopViewPager extends ViewPager {
 
     protected void init() {
         super.addOnPageChangeListener(onPageChangeListener);
+        mAutoLoopControl = new AutoLoopControl(this);
     }
 
     private long downTime = 0;
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent arg0) {
         //长按时拦截点击事件
@@ -56,9 +59,7 @@ public class  LoopViewPager extends ViewPager {
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         //触摸时停止自动滚动
-        if(mAutoLoopControl!=null){
-            mAutoLoopControl.handlerDispatchTouchEvent(ev);
-        }
+        mAutoLoopControl.handlerDispatchTouchEvent(ev);
 
         //解决父listview拦截问题
         switch (MotionEventCompat.getActionMasked(ev)) {
@@ -68,13 +69,13 @@ public class  LoopViewPager extends ViewPager {
                 getParent().requestDisallowInterceptTouchEvent(true);
                 break;
             case MotionEvent.ACTION_MOVE:
-                if(scrollState == ViewPager.SCROLL_STATE_DRAGGING){
+                if (scrollState == ViewPager.SCROLL_STATE_DRAGGING) {
                     getParent().requestDisallowInterceptTouchEvent(true);
                     break;
                 }
-                if(Math.abs(ev.getX()-mDownX) > Math.abs(ev.getY()-mDownX)){
+                if (Math.abs(ev.getX() - mDownX) > Math.abs(ev.getY() - mDownX)) {
                     getParent().requestDisallowInterceptTouchEvent(true);
-                }else{
+                } else {
                     getParent().requestDisallowInterceptTouchEvent(false);
                 }
                 break;
@@ -94,27 +95,21 @@ public class  LoopViewPager extends ViewPager {
      * 开始自动滚动，间隔时间,默认3000m或者上一次设置的时间
      */
     public void startAutoLoop() {
-        if(mAutoLoopControl == null){
-            mAutoLoopControl = new AutoLoopControl(this);
-        }
         mAutoLoopControl.startAutoLoop();
+        Log.d("viewpager", "startAutoLoop");
     }
 
     /**
      * 开始自动滚动
+     *
      * @param interval 滚动间隔时间 ms
      */
     public void startAutoLoop(long interval) {
-        if(mAutoLoopControl == null){
-            mAutoLoopControl = new AutoLoopControl(this);
-        }
         mAutoLoopControl.startAutoLoop(interval);
     }
 
-    public void stopAutoLoop(){
-        if(mAutoLoopControl != null){
-            mAutoLoopControl.stopAutoLoop();
-        }
+    public void stopAutoLoop() {
+        mAutoLoopControl.stopAutoLoop();
     }
 
     @Override
@@ -123,18 +118,18 @@ public class  LoopViewPager extends ViewPager {
             throw new IllegalArgumentException("adapter must be LoopPagerAdapter instance!");
         }
 
-        final LoopPagerAdapter loopPagerAdapter = (LoopPagerAdapter)adapter;
+        final LoopPagerAdapter loopPagerAdapter = (LoopPagerAdapter) adapter;
 
         mAdapter = new LoopPagerAdapterWrapper(loopPagerAdapter);
 
         super.setAdapter(mAdapter);
-        //有些系统不notify一下会报错
+
         mAdapter.notifyDataSetChanged();
 
         setCurrentItem(0, false);
 
         //重置滚动时间
-        if(mAutoLoopControl !=null && mAutoLoopControl.isAutoLoop()){
+        if (mAutoLoopControl.isAutoLoop()) {
             mAutoLoopControl.startAutoLoop();
         }
     }
@@ -152,6 +147,7 @@ public class  LoopViewPager extends ViewPager {
     public void setCurrentItem(int item, boolean smoothScroll) {
         int realItem = mAdapter.toInnerPosition(item);
         super.setCurrentItem(realItem, smoothScroll);
+        Log.d("viewpager","setCurrentItem");
     }
 
     @Override
@@ -172,8 +168,6 @@ public class  LoopViewPager extends ViewPager {
         //super.addOnPageChangeListener(mOuterPageChangeListener);
     }
 
-
-
     int scrollState;
 
     private OnPageChangeListener onPageChangeListener = new OnPageChangeListener() {
@@ -182,8 +176,6 @@ public class  LoopViewPager extends ViewPager {
 
         @Override
         public void onPageSelected(int position) {
-
-            Log.d("viewpager","onPageSelected:"+position);
 
             int realPosition = mAdapter.toRealPosition(position);
             if (mPreviousPosition != realPosition) {
@@ -241,4 +233,36 @@ public class  LoopViewPager extends ViewPager {
             }
         }
     };
+
+    @Override
+    protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+        if (visibility == View.VISIBLE) {
+            mAutoLoopControl.resumeAutoLoop();
+            awakenScrollBars();
+        } else if (visibility == INVISIBLE || visibility == GONE) {
+            mAutoLoopControl.pauseAutoLoop();
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+    }
+
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        if (visibility == View.VISIBLE) {
+            mAutoLoopControl.resumeAutoLoop();
+        } else if (visibility == INVISIBLE || visibility == GONE) {
+            mAutoLoopControl.pauseAutoLoop();
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        //super.onAttachedToWindow();
+        //recycleView添加viewpager会有第一次setcurrentItem时没有切换动画的bug，注释掉上面代码即可
+    }
 }

@@ -5,6 +5,7 @@ import android.support.v4.view.PagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  * @author li.zhen
  * @類說明
  **/
-public abstract class LoopPagerAdapter<T> extends PagerAdapter{
+public abstract class LoopPagerAdapter<T> extends PagerAdapter {
 
     /**
      * 缓存View，当list的数据很多时也不会内存溢出
@@ -20,14 +21,18 @@ public abstract class LoopPagerAdapter<T> extends PagerAdapter{
     private LinkedList<View> mViews = new LinkedList<>();
 
     private Context mContext;
-    private List<T> mData;
+    private List<T> mData = new ArrayList<>();
     private int mLayoutId;
 
     public LoopPagerAdapter(Context context, int layoutId, List<T> data){
-        if(data == null){
+        /*if(data == null){
             throw new IllegalArgumentException("data can't be null!");
+        }*/
+        if(data == null){
+            data = new ArrayList<>();
         }
-        mData = data;
+        mData.clear();
+        mData.addAll(data);
         mContext = context;
         mLayoutId = layoutId;
     }

@@ -34,6 +34,7 @@ public class AutoLoopControl {
     public AutoLoopControl(ViewPager viewPager) {
         mViewPager = viewPager;
         initScroller();
+        mHandler = new ScrollHandler();
     }
 
     /**
@@ -56,17 +57,13 @@ public class AutoLoopControl {
         //触摸时停止自动滚动
         switch (MotionEventCompat.getActionMasked(ev)) {
             case MotionEvent.ACTION_DOWN:
-                stopScrollToNext();
+                pauseAutoLoop();
                 break;
             case MotionEvent.ACTION_UP:
-                if(isAutoLoop()){
-                    sendMessageScrollToNext();
-                }
+                resumeAutoLoop();
                 break;
             case MotionEvent.ACTION_CANCEL:
-                if(isAutoLoop()){
-                    sendMessageScrollToNext();
-                }
+                resumeAutoLoop();
                 break;
             default:
                 break;
@@ -75,14 +72,12 @@ public class AutoLoopControl {
 
     /**
      * 开始滚动
+     *
      * @param interval 间隔时间
      */
     public void startAutoLoop(long interval) {
         mInterval = interval;
         isAutoLoop = true;
-        if(mHandler == null){
-            mHandler = new ScrollHandler();
-        }
         sendMessageScrollToNext();
     }
 
@@ -90,13 +85,23 @@ public class AutoLoopControl {
         startAutoLoop(mInterval);
     }
 
-    public void stopAutoLoop(){
+    public void pauseAutoLoop() {
+        stopScrollToNext();
+    }
+
+    public void resumeAutoLoop() {
+        if (isAutoLoop) {
+            sendMessageScrollToNext();
+        }
+    }
+
+    public void stopAutoLoop() {
         isAutoLoop = false;
         stopScrollToNext();
     }
 
-    public boolean isAutoLoop(){
-        return  isAutoLoop;
+    public boolean isAutoLoop() {
+        return isAutoLoop;
     }
 
     private void scrollToNext() {
@@ -104,16 +109,12 @@ public class AutoLoopControl {
     }
 
     private void stopScrollToNext() {
-        if (mHandler != null) {
-            mHandler.removeMessages(WHAT_SHOW_NEXT);
-        }
+        mHandler.removeMessages(WHAT_SHOW_NEXT);
     }
 
     private void sendMessageScrollToNext() {
-        if (mHandler != null) {
-            mHandler.removeMessages(WHAT_SHOW_NEXT);
-            mHandler.sendEmptyMessageDelayed(WHAT_SHOW_NEXT, mInterval);
-        }
+        mHandler.removeMessages(WHAT_SHOW_NEXT);
+        mHandler.sendEmptyMessageDelayed(WHAT_SHOW_NEXT, mInterval);
     }
 
     private class ScrollHandler extends Handler {
@@ -153,7 +154,7 @@ public class AutoLoopControl {
 
         @Override
         public void startScroll(int startX, int startY, int dx, int dy, int duration) {
-            super.startScroll(startX, startY, dx, dy, (int)(duration * scrollFactor));
+            super.startScroll(startX, startY, dx, dy, (int) (duration * scrollFactor));
         }
     }
 }
