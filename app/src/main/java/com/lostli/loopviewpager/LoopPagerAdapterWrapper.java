@@ -67,7 +67,7 @@ public class LoopPagerAdapterWrapper extends PagerAdapter {
 
     @Override
     public int getCount() {
-        if(mAdapter.getCount() == 0){
+        if (mAdapter.getCount() == 0) {
             return 0;
         }
         return mAdapter.getCount() + 2;
@@ -83,7 +83,7 @@ public class LoopPagerAdapterWrapper extends PagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        if(getRealCount() == 0){
+        if (getRealCount() == 0) {
             return null;
         }
 
@@ -99,7 +99,7 @@ public class LoopPagerAdapterWrapper extends PagerAdapter {
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
-        if(getRealCount() == 0){
+        if (getRealCount() == 0) {
             return;
         }
         int realFirst = getRealFirstPosition();
@@ -107,7 +107,7 @@ public class LoopPagerAdapterWrapper extends PagerAdapter {
         int realPosition = toRealPosition(position);
 
         if (position == realFirst || position == realLast) {
-            mFLItems.put(position,(View)object);
+            mFLItems.put(position, (View) object);
         } else {
             mAdapter.destroyItem(container, realPosition, object);
         }

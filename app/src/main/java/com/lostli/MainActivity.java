@@ -59,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadData() {
         mAdapter = new MyAdapter(this,data1);
+        loopViewPager.setIsLoop(false);
+        loopViewPager.setIsVertical(true);
         loopViewPager.setAdapter(mAdapter);
         indicator.setViewPager(loopViewPager);
         loopViewPager.startAutoLoop();

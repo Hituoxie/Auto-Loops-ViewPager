@@ -17,7 +17,21 @@ import android.view.View;
 public class LoopViewPager extends ViewPager {
     private AutoLoopControl mAutoLoopControl;
     private OnPageChangeListener mOuterPageChangeListener;
-    private LoopPagerAdapterWrapper mAdapter;
+    private LoopPagerAdapterWrapper mLoopAdapter;
+
+    private LoopPagerAdapter mNoLoopAdapter;
+
+    private MyOnPageChangeListener onPageChangeListener;
+
+    /**
+     * 是否无限循环
+     */
+    private boolean isLoop = true;
+
+    /**
+     * 是否垂直
+     */
+    private boolean isVertical = false;
 
     public LoopViewPager(Context context) {
         super(context);
@@ -30,28 +44,20 @@ public class LoopViewPager extends ViewPager {
     }
 
     protected void init() {
-        super.addOnPageChangeListener(onPageChangeListener);
+        //super.addOnPageChangeListener(onPageChangeListener);
         mAutoLoopControl = new AutoLoopControl(this);
     }
 
-    private long downTime = 0;
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent arg0) {
-        //长按时拦截点击事件
-        switch (MotionEventCompat.getActionMasked(arg0)) {
-            case MotionEvent.ACTION_DOWN:
-                downTime = System.currentTimeMillis();
-                break;
-
-            case MotionEvent.ACTION_UP:
-                if ((System.currentTimeMillis() - downTime) > 600) {
-                    return true;
-                }
-                break;
+    protected void initVertical() {
+        if(isVertical){
+            // The majority of the magic happens here
+            setPageTransformer(true, new VerticalPageTransformer());
+            // The easiest way to get rid of the overscroll drawing that happens on the left and right
+            setOverScrollMode(OVER_SCROLL_NEVER);
         }
-        return super.onInterceptTouchEvent(arg0);
     }
+
+
 
     float mDownX;
     float mDownY;
@@ -95,7 +101,10 @@ public class LoopViewPager extends ViewPager {
      * 开始自动滚动，间隔时间,默认3000m或者上一次设置的时间
      */
     public void startAutoLoop() {
-        mAutoLoopControl.startAutoLoop();
+        if(isLoop){
+            mAutoLoopControl.startAutoLoop();
+        }
+
         Log.d("viewpager", "startAutoLoop");
     }
 
@@ -105,11 +114,30 @@ public class LoopViewPager extends ViewPager {
      * @param interval 滚动间隔时间 ms
      */
     public void startAutoLoop(long interval) {
-        mAutoLoopControl.startAutoLoop(interval);
+        if(isLoop){
+            mAutoLoopControl.startAutoLoop(interval);
+        }
     }
 
     public void stopAutoLoop() {
-        mAutoLoopControl.stopAutoLoop();
+        if(isLoop){
+            mAutoLoopControl.stopAutoLoop();
+        }
+    }
+
+    /**设置是否无限滑动，在setAdapter之前调用
+     * @param isLoop
+     */
+    public void setIsLoop(boolean isLoop){
+        this.isLoop = isLoop;
+    }
+
+    /**设置是否垂直，在setAdapter之前调用
+     * @param isVertical
+     */
+    public void setIsVertical(boolean isVertical){
+        this.isVertical = isVertical;
+        initVertical();
     }
 
     @Override
@@ -120,34 +148,55 @@ public class LoopViewPager extends ViewPager {
 
         final LoopPagerAdapter loopPagerAdapter = (LoopPagerAdapter) adapter;
 
-        mAdapter = new LoopPagerAdapterWrapper(loopPagerAdapter);
+        if(isLoop){
+            if(onPageChangeListener == null){
+                onPageChangeListener = new MyOnPageChangeListener();
+                super.addOnPageChangeListener(onPageChangeListener);
+            }
 
-        super.setAdapter(mAdapter);
-
-        mAdapter.notifyDataSetChanged();
+            mLoopAdapter = new LoopPagerAdapterWrapper(loopPagerAdapter);
+            super.setAdapter(mLoopAdapter);
+            mLoopAdapter.notifyDataSetChanged();
+            //重置滚动时间
+            if (mAutoLoopControl.isAutoLoop()) {
+                mAutoLoopControl.startAutoLoop();
+            }
+        }else{
+            mNoLoopAdapter = loopPagerAdapter;
+            super.setAdapter(mNoLoopAdapter);
+            mNoLoopAdapter.notifyDataSetChanged();
+        }
 
         setCurrentItem(0, false);
-
-        //重置滚动时间
-        if (mAutoLoopControl.isAutoLoop()) {
-            mAutoLoopControl.startAutoLoop();
-        }
     }
 
     @Override
     public PagerAdapter getAdapter() {
-        return mAdapter != null ? mAdapter.getRealAdapter() : mAdapter;
+        if(isLoop){
+            return mLoopAdapter != null ? mLoopAdapter.getRealAdapter() : mLoopAdapter;
+        }else{
+            return mNoLoopAdapter;
+        }
+
     }
 
     @Override
     public int getCurrentItem() {
-        return mAdapter != null ? mAdapter.toRealPosition(super.getCurrentItem()) : 0;
+        if(isLoop){
+            return mLoopAdapter != null ? mLoopAdapter.toRealPosition(super.getCurrentItem()) : 0;
+        }else{
+            return super.getCurrentItem();
+        }
+
     }
 
     public void setCurrentItem(int item, boolean smoothScroll) {
-        int realItem = mAdapter.toInnerPosition(item);
-        super.setCurrentItem(realItem, smoothScroll);
-        Log.d("viewpager","setCurrentItem");
+        if(isLoop){
+            int realItem = mLoopAdapter.toInnerPosition(item);
+            super.setCurrentItem(realItem, smoothScroll);
+        }else{
+            super.setCurrentItem(item, smoothScroll);
+        }
     }
 
     @Override
@@ -159,25 +208,68 @@ public class LoopViewPager extends ViewPager {
 
     @Override
     public void setOnPageChangeListener(OnPageChangeListener listener) {
-        mOuterPageChangeListener = listener;
+        if(isLoop){
+            mOuterPageChangeListener = listener;
+        }else{
+            super.setOnPageChangeListener(listener);
+        }
+
     }
 
     @Override
     public void addOnPageChangeListener(OnPageChangeListener listener) {
-        mOuterPageChangeListener = listener;
-        //super.addOnPageChangeListener(mOuterPageChangeListener);
+        if(isLoop){
+            mOuterPageChangeListener = listener;
+        }else{
+            super.addOnPageChangeListener(listener);
+        }
+    }
+
+    @Override
+    protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+        if(isLoop){
+            if (visibility == View.VISIBLE) {
+                mAutoLoopControl.resumeAutoLoop();
+                awakenScrollBars();
+            } else if (visibility == INVISIBLE || visibility == GONE) {
+                mAutoLoopControl.pauseAutoLoop();
+            }
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+    }
+
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        if(isLoop){
+            super.onVisibilityChanged(changedView, visibility);
+            if (visibility == View.VISIBLE) {
+                mAutoLoopControl.resumeAutoLoop();
+            } else if (visibility == INVISIBLE || visibility == GONE) {
+                mAutoLoopControl.pauseAutoLoop();
+            }
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        //super.onAttachedToWindow();
+        Log.d("viewpager","onAttachedToWindow");
     }
 
     int scrollState;
-
-    private OnPageChangeListener onPageChangeListener = new OnPageChangeListener() {
+    private class MyOnPageChangeListener implements OnPageChangeListener{
         private float mPreviousOffset = -1;
         private float mPreviousPosition = -1;
 
         @Override
         public void onPageSelected(int position) {
 
-            int realPosition = mAdapter.toRealPosition(position);
+            int realPosition = mLoopAdapter.toRealPosition(position);
             if (mPreviousPosition != realPosition) {
                 mPreviousPosition = realPosition;
                 if (mOuterPageChangeListener != null) {
@@ -188,21 +280,21 @@ public class LoopViewPager extends ViewPager {
 
         @Override
         public void onPageScrolled(int position, float positionOffset,
-                                   int positionOffsetPixels) {
+        int positionOffsetPixels) {
             int realPosition = position;
-            if (mAdapter != null) {
-                realPosition = mAdapter.toRealPosition(position);
+            if (mLoopAdapter != null) {
+                realPosition = mLoopAdapter.toRealPosition(position);
 
                 if (positionOffset == 0
                         && mPreviousOffset == 0
-                        && (position == 0 || position == mAdapter.getCount() - 1)) {
+                        && (position == 0 || position == mLoopAdapter.getCount() - 1)) {
                     setCurrentItem(realPosition, false);
                 }
             }
 
             mPreviousOffset = positionOffset;
             if (mOuterPageChangeListener != null) {
-                if (realPosition != mAdapter.getRealCount() - 1) {
+                if (realPosition != mLoopAdapter.getRealCount() - 1) {
                     mOuterPageChangeListener.onPageScrolled(realPosition,
                             positionOffset, positionOffsetPixels);
                 } else {
@@ -219,12 +311,12 @@ public class LoopViewPager extends ViewPager {
         @Override
         public void onPageScrollStateChanged(int state) {
             scrollState = state;
-            if (mAdapter != null) {
+            if (mLoopAdapter != null) {
                 int position = LoopViewPager.super.getCurrentItem();
-                int realPosition = mAdapter.toRealPosition(position);
+                int realPosition = mLoopAdapter.toRealPosition(position);
 
                 if (state == ViewPager.SCROLL_STATE_IDLE
-                        && (position == 0 || position == mAdapter.getCount() - 1)) {
+                        && (position == 0 || position == mLoopAdapter.getCount() - 1)) {
                     setCurrentItem(realPosition, false);
                 }
             }
@@ -232,37 +324,66 @@ public class LoopViewPager extends ViewPager {
                 mOuterPageChangeListener.onPageScrollStateChanged(state);
             }
         }
-    };
+    }
+
+    private class VerticalPageTransformer implements PageTransformer {
+
+        @Override
+        public void transformPage(View view, float position) {
+
+            if (position < -1) { // [-Infinity,-1)
+                // This page is way off-screen to the left.
+                view.setAlpha(0);
+
+            } else if (position <= 1) { // [-1,1]
+                view.setAlpha(1);
+
+                // Counteract the default slide transition
+                view.setTranslationX(view.getWidth() * -position);
+
+                //set Y position to swipe in from top
+                float yPosition = position * view.getHeight();
+                view.setTranslationY(yPosition);
+
+            } else { // (1,+Infinity]
+                // This page is way off-screen to the right.
+                view.setAlpha(0);
+            }
+        }
+    }
+
+    /**
+     * Swaps the X and Y coordinates of your touch event.
+     */
+    private MotionEvent swapXY(MotionEvent ev) {
+        float width = getWidth();
+        float height = getHeight();
+
+        float newX = (ev.getY() / height) * width;
+        float newY = (ev.getX() / width) * height;
+
+        ev.setLocation(newX, newY);
+
+        return ev;
+    }
 
     @Override
-    protected void onWindowVisibilityChanged(int visibility) {
-        super.onWindowVisibilityChanged(visibility);
-        if (visibility == View.VISIBLE) {
-            mAutoLoopControl.resumeAutoLoop();
-            awakenScrollBars();
-        } else if (visibility == INVISIBLE || visibility == GONE) {
-            mAutoLoopControl.pauseAutoLoop();
+    public boolean onInterceptTouchEvent(MotionEvent ev){
+        if(isVertical){
+            boolean intercepted = super.onInterceptTouchEvent(swapXY(ev));
+            swapXY(ev); // return touch coordinates to original reference frame for any child views
+            return intercepted;
+        }else{
+            return super.onInterceptTouchEvent(ev);
         }
     }
 
     @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-    }
-
-    @Override
-    protected void onVisibilityChanged(View changedView, int visibility) {
-        super.onVisibilityChanged(changedView, visibility);
-        if (visibility == View.VISIBLE) {
-            mAutoLoopControl.resumeAutoLoop();
-        } else if (visibility == INVISIBLE || visibility == GONE) {
-            mAutoLoopControl.pauseAutoLoop();
+    public boolean onTouchEvent(MotionEvent ev) {
+        if(isVertical){
+            return super.onTouchEvent(swapXY(ev));
+        }else{
+            return super.onTouchEvent(ev);
         }
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        //super.onAttachedToWindow();
-        //recycleView添加viewpager会有第一次setcurrentItem时没有切换动画的bug，注释掉上面代码即可
     }
 }
